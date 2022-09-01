@@ -1,25 +1,53 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from "react";
 
-function App() {
+import './App.css'
+import CardList from './components/card-list/card-list.components';
+import SearchBox from './components/search-box/search-box.component';
+
+// Whenever the functional component re-renders it runs the code from top to bottom
+
+const App = () => {
+  const [searchField, setSearchField] = useState('');
+  const [monsters, setMonsters] = useState([])
+  const [filteredMonsters, setFilteredMonsters] = useState(monsters);
+  console.log('render');
+
+  useEffect(() => {
+    console.log("Fetch request")
+    fetch('https://jsonplaceholder.typicode.com/users')
+      .then((response) => response.json())
+      .then((users) => setMonsters(users));
+  }, [])
+
+
+  const onSearchChange = (event) => {
+    const searchFieldString = event.target.value.toLocaleLowerCase();
+    setSearchField(searchFieldString);
+  }
+
+  useEffect(() => {
+    const newFilteredMonsters = monsters.filter((monster) => {
+      return monster.name.toLocaleLowerCase().includes(searchField);
+    });
+
+    setFilteredMonsters(newFilteredMonsters);
+
+  }, [monsters, searchField])
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1 className="app-title">
+        Monsters Rolodex
+      </h1>
+      <SearchBox
+        className='monsters-search-box'
+        onChangeHandler={onSearchChange}
+        placeholder='Search monsters' />
+      <CardList monsters={filteredMonsters} />
+
     </div>
-  );
+  )
+
 }
 
 export default App;
